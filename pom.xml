@@ -162,7 +162,7 @@
 			<artifactId>ojdbc14</artifactId>
 			<version>10.2.0.3.0</version>
 			<scope>system</scope>
-			<systemPath>${user.dir}/lib/ojdbc14-10.2.0.3.0.jar</systemPath>
+			<systemPath>${basedir}/lib/ojdbc14-10.2.0.3.0.jar</systemPath>
 		</dependency>
 		<dependency>
 			<groupId>commons-configuration</groupId>
