@@ -1,0 +1,12 @@
+{"namespace": "com.taobao.yugong",
+  "protocol": "AMTP",
+  "types": [],
+  "messages": {
+    "send": {
+      "request": [
+        {"name": "topic", "type": "string"},
+        {"name": "content", "type": "bytes"}],
+      "response": "string"
+    }
+  }
+}
