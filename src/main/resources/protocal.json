@@ -1,11 +1,19 @@
-{"namespace": "com.taobao.yugong",
+{
+  "namespace": "com.taobao.yugong",
   "protocol": "AMTP",
   "types": [],
   "messages": {
     "send": {
       "request": [
-        {"name": "topic", "type": "string"},
-        {"name": "content", "type": "bytes"}],
+        {
+          "name": "topic",
+          "type": "string"
+        },
+        {
+          "name": "content",
+          "type": "bytes"
+        }
+      ],
       "response": "string"
     }
   }
