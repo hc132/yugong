@@ -104,9 +104,10 @@ public class YuGongInstance extends AbstractYuGongLifeCycle {
 
             // 后续可改进为按类型识别添加
             coreTranslators.add(new OracleIncreamentDataTranslator());
-            if (targetDbType.isOracle()) {
+            //TODO target is avro rpc
+            /*if (targetDbType.isOracle()) {
                 coreTranslators.add(new EncodeDataTranslator(context.getSourceEncoding(), context.getTargetEncoding())); // oracle源库已经正确将编码转为'UTF-8'了
-            }
+            }*/
 
             if (!positioner.isStart()) {
                 positioner.start();

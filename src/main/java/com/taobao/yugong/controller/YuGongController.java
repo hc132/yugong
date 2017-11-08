@@ -14,6 +14,7 @@ import java.util.concurrent.TimeUnit;
 
 import javax.sql.DataSource;
 
+import com.taobao.yugong.applier.*;
 import org.apache.commons.configuration.Configuration;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.BooleanUtils;
@@ -22,14 +23,6 @@ import org.slf4j.MDC;
 import org.springframework.jdbc.core.JdbcTemplate;
 
 import com.google.common.collect.Lists;
-import com.taobao.yugong.applier.AllRecordApplier;
-import com.taobao.yugong.applier.CheckRecordApplier;
-import com.taobao.yugong.applier.FullRecordApplier;
-import com.taobao.yugong.applier.IncrementRecordApplier;
-import com.taobao.yugong.applier.MultiThreadCheckRecordApplier;
-import com.taobao.yugong.applier.MultiThreadFullRecordApplier;
-import com.taobao.yugong.applier.MultiThreadIncrementRecordApplier;
-import com.taobao.yugong.applier.RecordApplier;
 import com.taobao.yugong.common.YuGongConstants;
 import com.taobao.yugong.common.alarm.AlarmService;
 import com.taobao.yugong.common.alarm.LogAlarmService;
@@ -106,8 +99,8 @@ public class YuGongController extends AbstractYuGongLifeCycle {
             throw new YuGongException("yugong.table.mode should not be empty");
         }
         this.runMode = RunMode.valueOf(mode);
-        this.sourceDbType = DbType.valueOf(StringUtils.upperCase(config.getString("yugong.database.source.type")));
-        this.targetDbType = DbType.valueOf(StringUtils.upperCase(config.getString("yugong.database.target.type")));
+        //TODO 注释掉target加载，target替换为http，通过 avro rpc 实现
+        //this.targetDbType = DbType.valueOf(StringUtils.upperCase(config.getString("yugong.database.target.type")));
         this.translatorDir = new File(config.getString("yugong.translator.dir", "../conf/translator"));
         this.globalContext = initGlobalContext();
         this.alarmService = initAlarmService();
@@ -186,7 +179,8 @@ public class YuGongController extends AbstractYuGongLifeCycle {
             instance.setStatAggregation(statAggregation);
             instance.setRetryTimes(retryTimes);
             instance.setRetryInterval(retryInterval);
-            instance.setTargetDbType(targetDbType);
+            //TODO 注释掉target加载，target替换为http，通过 avro rpc 实现
+            //instance.setTargetDbType(targetDbType);
             instance.setProgressTracer(progressTracer);
             instance.setNoUpdateThresold(noUpdateThresold);
             // 设置translator的并发数
@@ -341,7 +335,7 @@ public class YuGongController extends AbstractYuGongLifeCycle {
     }
 
     private RecordApplier chooseApplier(TableHolder tableHolder, YuGongContext context, RunMode runMode) {
-        boolean concurrent = config.getBoolean("yugong.applier.concurrent.enable", true);
+        /*boolean concurrent = config.getBoolean("yugong.applier.concurrent.enable", true);
         int threadSize = config.getInt("yugong.applier.concurrent.size", 5);
         int splitSize = context.getOnceCrawNum() / threadSize;
         if (splitSize > 100 || splitSize <= 0) {
@@ -376,7 +370,9 @@ public class YuGongController extends AbstractYuGongLifeCycle {
             }
         } else {
             return new FullRecordApplier(context);// 其他情况返回一个full
-        }
+        }*/
+        //TODO applier改为AvroHttpRecordApplier
+        return new AvroHttpRecordApplier(config, tableHolder.table);
     }
 
     private DataTranslator choseTranslator(TableHolder tableHolder) {
@@ -447,12 +443,13 @@ public class YuGongController extends AbstractYuGongLifeCycle {
         // preCheckMlogGrant(context.getSourceDs());
         // }
 
-        logger.info("check target database connection ...");
-        context.setTargetDs(initDataSource("target"));
-        logger.info("check target database is ok");
+        //TODO 注释掉target ds load
+        //logger.info("check target database connection ...");
+        //context.setTargetDs(initDataSource("target"));
+        //logger.info("check target database is ok");
         context.setSourceEncoding(config.getString("yugong.database.source.encode", "UTF-8"));
-        context.setTargetEncoding(config.getString("yugong.database.target.encode", "UTF-8"));
-        context.setBatchApply(config.getBoolean("yugong.table.batchApply", true));
+        //context.setTargetEncoding(config.getString("yugong.database.target.encode", "UTF-8"));
+        //context.setBatchApply(config.getBoolean("yugong.table.batchApply", true));
         context.setOnceCrawNum(config.getInt("yugong.table.onceCrawNum", 200));
         context.setTpsLimit(config.getInt("yugong.table.tpsLimit", 2000));
         context.setIgnoreSchema(config.getBoolean("yugong.table.ignoreSchema", false));
@@ -493,7 +490,8 @@ public class YuGongController extends AbstractYuGongLifeCycle {
         }
 
         List<TableHolder> tables = Lists.newArrayList();
-        DbType targetDbType = YuGongUtils.judgeDbType(globalContext.getTargetDs());
+        //TODO 注释掉target ds judge
+        //DbType targetDbType = YuGongUtils.judgeDbType(globalContext.getTargetDs());
         if (!isEmpty) {
             for (Object obj : tableWhiteList) {
                 String whiteTable = getTable((String) obj);
@@ -525,7 +523,8 @@ public class YuGongController extends AbstractYuGongLifeCycle {
                             && !isBlackTable(table.getFullName(), tableBlackList)) {
                             TableMetaGenerator.buildColumns(globalContext.getSourceDs(), table);
                             // 构建一下拆分条件
-                            DataTranslator translator = buildExtKeys(table, (String) obj, targetDbType);
+                            //DataTranslator translator = buildExtKeys(table, (String) obj, targetDbType);
+                            DataTranslator translator = null;
                             TableHolder holder = new TableHolder(table);
                             holder.ignoreSchema = ignoreSchema;
                             holder.translator = translator;
@@ -542,8 +541,9 @@ public class YuGongController extends AbstractYuGongLifeCycle {
                 if (!isBlackTable(table.getName(), tableBlackList)
                     && !isBlackTable(table.getFullName(), tableBlackList)) {
                     TableMetaGenerator.buildColumns(globalContext.getSourceDs(), table);
-                    // 构建一下拆分条件
-                    DataTranslator translator = buildExtKeys(table, null, targetDbType);
+                    /*// 构建一下拆分条件
+                    DataTranslator translator = buildExtKeys(table, null, targetDbType);*/
+                    DataTranslator translator = null;
                     TableHolder holder = new TableHolder(table);
                     holder.translator = translator;
                     if (!tables.contains(holder)) {
