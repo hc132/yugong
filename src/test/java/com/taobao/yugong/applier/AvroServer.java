@@ -32,7 +32,7 @@ public class AvroServer extends GenericResponder {
         GenericRecord record = null;
         while (dataFileReader.hasNext()) {
             record = dataFileReader.next(record);
-            System.out.println(">>>>>>>>>>>>>>>>>>>>>> "+record);
+            System.out.println(topic + " ---> " + record);
         }
         /*List<Schema.Field> fields = req.getSchema().getFields().get(0).schema().getFields();
         for (Schema.Field field: fields) {
@@ -44,7 +44,7 @@ public class AvroServer extends GenericResponder {
 
     public void run() {
         try {
-            SaslSocketServer server = new SaslSocketServer(this, new InetSocketAddress("localhost", 8888));
+            SaslSocketServer server = new SaslSocketServer(this, new InetSocketAddress(8888));
             server.start();
             server.join();
         } catch (Exception e) {

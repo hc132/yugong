@@ -14,7 +14,7 @@ import java.util.ArrayList;
 /**
  * Created by weicm on 2017/11/6.
  */
-public class AvroHttpRecordApplierTest {
+public class AvroSocketRecordApplierTest {
     static Record getRecord(Table table, int id) {
         ArrayList<ColumnValue> columns = new ArrayList<ColumnValue>();
         columns.add(new ColumnValue(new ColumnMeta("id", Types.INTEGER), id));
@@ -28,10 +28,10 @@ public class AvroHttpRecordApplierTest {
         config.addProperty("yugong.target.host", "localhost");
         config.addProperty("yugong.target.port", "8888");
         Table table = new Table("MYSQL", "test", "mytable");
-        AvroHttpRecordApplier client = new AvroHttpRecordApplier(config, table);
+        AvroSocketRecordApplier client = new AvroSocketRecordApplier(config, table);
         client.start();
-        client.apply(Lists.newArrayList(getRecord(client.getTable(), 1)));
-        client.apply(Lists.newArrayList(getRecord(client.getTable(), 2)));
-        client.apply(Lists.newArrayList(getRecord(client.getTable(), 3)));
+        client.apply(Lists.newArrayList(getRecord(table, 1)));
+        client.apply(Lists.newArrayList(getRecord(table, 2)));
+        client.apply(Lists.newArrayList(getRecord(table, 3)));
     }
 }

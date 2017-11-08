@@ -372,7 +372,7 @@ public class YuGongController extends AbstractYuGongLifeCycle {
             return new FullRecordApplier(context);// 其他情况返回一个full
         }*/
         //TODO applier改为AvroHttpRecordApplier
-        return new AvroHttpRecordApplier(config, tableHolder.table);
+        return new AvroSocketRecordApplier(config, tableHolder.table);
     }
 
     private DataTranslator choseTranslator(TableHolder tableHolder) {
